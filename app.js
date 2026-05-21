@@ -5,7 +5,7 @@ const generateButton = document.querySelector('.generate-button');
 const passwordOutput = document.getElementById('password-output');
 const copyButton = document.querySelector('.copy-button');
 
-const API_URL = 'https://api-ninjas.com/api/passwordgenerator';
+const API_URL = 'https://api.api-ninjas.com/v1/passwordgenerator';
 const API_KEY = '7jOopObxQQGIN7DfjwRDJA==ZFqrj6BH8ydPMYRW';
 
 function mostrarMensaje(mensaje, esError = false) {
