@@ -3,14 +3,19 @@ const includeNumbersInput = document.getElementById('include-numbers');
 const includeSymbolsInput = document.getElementById('include-symbols');
 const generateButton = document.querySelector('.generate-button');
 const passwordOutput = document.getElementById('password-output');
+const statusMessage = document.getElementById('status-message');
 const copyButton = document.querySelector('.copy-button');
 
 const API_URL = 'https://api.api-ninjas.com/v1/passwordgenerator';
 const API_KEY = '7jOopObxQQGIN7DfjwRDJA==ZFqrj6BH8ydPMYRW';
 
 function mostrarMensaje(mensaje, esError = false) {
-  passwordOutput.value = mensaje;
-  passwordOutput.style.color = esError ? '#fca5a5' : '#e2e8f0';
+  statusMessage.textContent = mensaje;
+  statusMessage.style.color = esError ? '#fca5a5' : '#e2e8f0';
+}
+
+function limpiarMensaje() {
+  statusMessage.textContent = '';
 }
 
 async function generarContrasena() {
@@ -24,8 +29,6 @@ async function generarContrasena() {
     lowercase: 'true',
     numbers: includeNumbers ? 'true' : 'false',
     special: includeSymbols ? 'true' : 'false',
-    exclude_numbers: includeNumbers ? 'false' : 'true',
-    exclude_special_chars: includeSymbols ? 'false' : 'true',
   });
 
   const url = `${API_URL}?${queryParams.toString()}`;
@@ -66,13 +69,14 @@ async function generarContrasena() {
 
     passwordOutput.style.color = '#e2e8f0';
     passwordOutput.value = generated;
+    mostrarMensaje('Contraseña generada por la API.');
   } catch (error) {
     console.error('API error:', error.message || error);
     try {
       const fallback = generarLocal(length, includeNumbers, includeSymbols);
       passwordOutput.style.color = '#fef3c7';
       passwordOutput.value = fallback;
-      mostrarMensaje('Se usó el generador local porque la API no respetó las opciones.', false);
+      mostrarMensaje('Contraseña generada localmente para respetar las opciones seleccionadas.');
     } catch (e) {
       mostrarMensaje('No se pudo generar la contraseña. Revisa tu conexión o intenta más tarde.', true);
     }
@@ -98,6 +102,10 @@ function validarContrasena(password, includeNumbers, includeSymbols, expectedLen
 
 function copiarAlPortapapeles() {
   const contraseña = passwordOutput.value.trim();
+  if (!contraseña || contraseña.startsWith('Se usó') || contraseña.startsWith('No se pudo')) {
+    mostrarMensaje('No hay contraseña válida para copiar.', true);
+    return;
+  }
   if (!contraseña) {
     mostrarMensaje('No hay contraseña para copiar.', true);
     return;
