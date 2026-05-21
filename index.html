@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de Contraseñas Seguras</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="password-generator">
+      <section class="hero">
+        <h1>Generador de Contraseñas Seguras</h1>
+        <p>Elige tus opciones y crea una contraseña fuerte en segundos.</p>
+      </section>
+
+      <form class="generator-form" action="#" method="post">
+        <div class="form-group">
+          <label for="length">Longitud de la contraseña</label>
+          <input
+            id="length"
+            name="length"
+            type="number"
+            min="4"
+            max="32"
+            value="16"
+            required
+          />
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input id="include-numbers" name="includeNumbers" type="checkbox" checked />
+            Incluir números
+          </label>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input id="include-symbols" name="includeSymbols" type="checkbox" checked />
+            Incluir caracteres especiales
+          </label>
+        </div>
+
+        <button class="generate-button" type="button">Generar Contraseña</button>
+      </form>
+
+      <div class="output-panel">
+        <label for="password-output">Contraseña generada</label>
+        <div class="output-row">
+          <input id="password-output" class="password-output" type="text" readonly aria-readonly="true" placeholder="Aquí aparecerá la contraseña" />
+          <button class="copy-button" type="button">Copiar</button>
+        </div>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
