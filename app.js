@@ -20,8 +20,12 @@ async function generarContrasena() {
 
   const queryParams = new URLSearchParams({
     length: String(length),
-    numbers: String(includeNumbers),
-    special: String(includeSymbols),
+    uppercase: 'true',
+    lowercase: 'true',
+    numbers: includeNumbers ? 'true' : 'false',
+    special: includeSymbols ? 'true' : 'false',
+    exclude_numbers: includeNumbers ? 'false' : 'true',
+    exclude_special_chars: includeSymbols ? 'false' : 'true',
   });
 
   const url = `${API_URL}?${queryParams.toString()}`;
@@ -33,6 +37,7 @@ async function generarContrasena() {
     const response = await fetch(url, {
       headers: {
         'X-Api-Key': API_KEY,
+        'Accept': 'application/json',
       },
     });
 
@@ -46,27 +51,28 @@ async function generarContrasena() {
     if (contentType.includes('application/json')) {
       data = await response.json();
     } else {
-      // If API returns HTML or unexpected content, treat as error
       const text = await response.text();
       throw new Error('Respuesta inesperada de la API: ' + text.substring(0, 200));
     }
 
-    // API Ninjas devuelve `random_password` según la documentación.
     const generated = data.random_password || data.password || data.result;
     if (!generated) {
       throw new Error('La API no devolvió una contraseña válida.');
+    }
+
+    if (!validarContrasena(generated, includeNumbers, includeSymbols, length)) {
+      throw new Error('La API devolvió una contraseña que no cumple las opciones seleccionadas.');
     }
 
     passwordOutput.style.color = '#e2e8f0';
     passwordOutput.value = generated;
   } catch (error) {
     console.error('API error:', error.message || error);
-    // Intentar fallback local para no dejar la app inservible
     try {
       const fallback = generarLocal(length, includeNumbers, includeSymbols);
       passwordOutput.style.color = '#fef3c7';
       passwordOutput.value = fallback;
-      mostrarMensaje('Se usó el generador local porque la API falló.', false);
+      mostrarMensaje('Se usó el generador local porque la API no respetó las opciones.', false);
     } catch (e) {
       mostrarMensaje('No se pudo generar la contraseña. Revisa tu conexión o intenta más tarde.', true);
     }
@@ -74,6 +80,20 @@ async function generarContrasena() {
     generateButton.disabled = false;
     generateButton.textContent = 'Generar Contraseña';
   }
+}
+
+function validarContrasena(password, includeNumbers, includeSymbols, expectedLength) {
+  if (password.length !== expectedLength) return false;
+
+  const hasNumber = /\d/.test(password);
+  const hasSymbol = /[!@#$%^&*()_+\-=[\]{}|;:,.<>?]/.test(password);
+
+  if (includeNumbers && !hasNumber) return false;
+  if (!includeNumbers && hasNumber) return false;
+  if (includeSymbols && !hasSymbol) return false;
+  if (!includeSymbols && hasSymbol) return false;
+
+  return true;
 }
 
 function copiarAlPortapapeles() {
