@@ -37,34 +37,41 @@ async function generarContrasena() {
   generateButton.textContent = 'Generando...';
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        'X-Api-Key': API_KEY,
-        'Accept': 'application/json',
-      },
-    });
+    let generated = null;
+    const maxAttempts = 6;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error en la API: ${response.status} ${response.statusText} ${errorText}`);
-    }
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const response = await fetch(url, {
+        headers: {
+          'X-Api-Key': API_KEY,
+          Accept: 'application/json',
+        },
+      });
 
-    const contentType = response.headers.get('content-type') || '';
-    let data;
-    if (contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
-      throw new Error('Respuesta inesperada de la API: ' + text.substring(0, 200));
-    }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error en la API: ${response.status} ${response.statusText} ${errorText}`);
+      }
 
-    const generated = data.random_password || data.password || data.result;
-    if (!generated) {
-      throw new Error('La API no devolvió una contraseña válida.');
-    }
+      const contentType = response.headers.get('content-type') || '';
+      let data;
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error('Respuesta inesperada de la API: ' + text.substring(0, 200));
+      }
 
-    if (!validarContrasena(generated, includeNumbers, includeSymbols, length)) {
-      throw new Error('La API devolvió una contraseña que no cumple las opciones seleccionadas.');
+      const candidate = data.random_password || data.password || data.result;
+      if (candidate && validarContrasena(candidate, includeNumbers, includeSymbols, length)) {
+        generated = candidate;
+        break;
+      }
+
+      console.warn(`Intento ${attempt} de la API devolvió valor inválido:`, candidate);
+      if (attempt === maxAttempts) {
+        throw new Error('La API no devolvió una contraseña válida tras varios intentos.');
+      }
     }
 
     passwordOutput.style.color = '#e2e8f0';
