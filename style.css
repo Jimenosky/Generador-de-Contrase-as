@@ -9,7 +9,11 @@
   --accent: #38bdf8;
   --accent-strong: #0ea5e9;
   --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
   --shadow: 0 18px 45px rgba(10, 15, 24, 0.35);
+  --radius-btn: 16px;
+  --transition: 0.22s ease;
 }
 
 * {
@@ -79,6 +83,14 @@ input[type="number"],
   background: #0b1220;
   color: var(--text);
   font-size: 1rem;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input[type="number"]:focus,
+.password-output:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -112,12 +124,19 @@ input[type="number"]::-webkit-outer-spin-button {
 .generate-button,
 .copy-button {
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-btn);
   padding: 14px 20px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color var(--transition), transform var(--transition),
+    box-shadow var(--transition), opacity var(--transition);
+}
+
+.generate-button:focus-visible,
+.copy-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .generate-button {
@@ -127,9 +146,16 @@ input[type="number"]::-webkit-outer-spin-button {
   box-shadow: 0 12px 30px rgba(56, 189, 248, 0.26);
 }
 
-.generate-button:hover {
+.generate-button:hover:not(:disabled) {
   background: linear-gradient(135deg, #22d3ee, #0ea5e9);
   transform: translateY(-1px);
+}
+
+.generate-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .output-panel {
@@ -153,12 +179,50 @@ input[type="number"]::-webkit-outer-spin-button {
   width: fit-content;
   padding: 12px 18px;
   align-self: center;
+  border: 1px solid rgba(148, 163, 184, 0.15);
 }
 
-.copy-button:hover {
+.copy-button:hover:not(:disabled) {
   background: #1f2937;
   transform: translateY(-1px);
 }
+
+.copy-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Estado visual cuando la copia fue exitosa */
+.copy-button--success {
+  background: rgba(74, 222, 128, 0.15) !important;
+  color: var(--success) !important;
+  border-color: rgba(74, 222, 128, 0.35) !important;
+  transform: none !important;
+}
+
+/* ── Status message ── */
+.status-message {
+  min-height: 1.4em;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+  transition: color var(--transition), opacity var(--transition);
+  opacity: 0;
+}
+
+.status-message:not(:empty) {
+  opacity: 1;
+}
+
+.status-message[data-tipo="success"] { color: var(--success); }
+.status-message[data-tipo="error"]   { color: var(--danger);  }
+.status-message[data-tipo="warning"] { color: var(--warning); }
+.status-message[data-tipo="info"]    { color: var(--muted);   }
+
+/* ── Password output coloring by source ── */
+.password-output[data-source="api"]   { color: var(--text);    }
+.password-output[data-source="local"] { color: var(--warning); }
 
 @media (min-width: 640px) {
   .output-row {

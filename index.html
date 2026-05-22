@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Generador de contraseñas seguras con opciones de longitud, números y caracteres especiales. Powered by API Ninjas." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>" />
     <title>Generador de Contraseñas Seguras</title>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -13,7 +15,7 @@
         <p>Elige tus opciones y crea una contraseña fuerte en segundos.</p>
       </section>
 
-      <form class="generator-form" action="#" method="post">
+      <form class="generator-form" action="#" novalidate>
         <div class="form-group">
           <label for="length">Longitud de la contraseña</label>
           <input
@@ -41,14 +43,14 @@
           </label>
         </div>
 
-        <button class="generate-button" type="button">Generar Contraseña</button>
+        <button class="generate-button" id="generate-button" type="button" aria-label="Generar contraseña segura">Generar Contraseña</button>
       </form>
 
       <div class="output-panel">
         <label for="password-output">Contraseña generada</label>
         <div class="output-row">
-          <input id="password-output" class="password-output" type="text" readonly aria-readonly="true" placeholder="Aquí aparecerá la contraseña" />
-          <button class="copy-button" type="button">Copiar</button>
+                    <input id="password-output" class="password-output" type="text" readonly aria-readonly="true" placeholder="Aquí aparecerá la contraseña" />
+          <button class="copy-button" id="copy-button" type="button" aria-label="Copiar contraseña al portapapeles" disabled>Copiar</button>
         </div>
         <p id="status-message" class="status-message" aria-live="polite"></p>
       </div>
