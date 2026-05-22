@@ -78,10 +78,16 @@ async function generarContrasena() {
     generated = limpiarSegunOpciones(generated, includeNumbers, includeSymbols);
     generated = ajustarLongitudConFallback(generated, length, includeNumbers, includeSymbols);
 
-    passwordOutput.dataset.source = 'api';
+    if (!cumpleCriterios(generated, includeNumbers, includeSymbols)) {
+      generated = generarLocal(length, includeNumbers, includeSymbols);
+      passwordOutput.dataset.source = 'local';
+      mostrarMensaje('⚠️ La API no incluyó todos los tipos requeridos — contraseña completada localmente.', 'warning');
+    } else {
+      passwordOutput.dataset.source = 'api';
+      mostrarMensaje('✅ Contraseña generada correctamente.', 'success');
+    }
     passwordOutput.value = generated;
     copyButton.disabled = false;
-    mostrarMensaje('✅ Contraseña generada correctamente.', 'success');
   } catch (error) {
     console.error('API error:', error.message || error);
     try {
@@ -172,9 +178,15 @@ function copiarAlPortapapeles() {
 generateButton.addEventListener('click', generarContrasena);
 copyButton.addEventListener('click', copiarAlPortapapeles);
 
+function cumpleCriterios(password, includeNumbers, includeSymbols) {
+  if (includeNumbers && !/[0-9]/.test(password)) return false;
+  if (includeSymbols && !/[^a-zA-Z0-9]/.test(password)) return false;
+  return true;
+}
+
 function generarLocal(length, useNumbers, useSymbols) {
-  const lower = 'abcdefghijklmnopqrstuvwxyz';
-  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower   = 'abcdefghijklmnopqrstuvwxyz';
+  const upper   = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const numbers = '0123456789';
   const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
 
@@ -186,17 +198,39 @@ function generarLocal(length, useNumbers, useSymbols) {
     throw new Error('No hay caracteres disponibles para generar.');
   }
 
-  let out = '';
   const cryptoObj = window.crypto || window.msCrypto;
-  for (let i = 0; i < length; i++) {
+
+  function randomChar(pool) {
     if (cryptoObj && cryptoObj.getRandomValues) {
       const array = new Uint32Array(1);
       cryptoObj.getRandomValues(array);
-      out += chars.charAt(array[0] % chars.length);
-    } else {
-      out += chars.charAt(Math.floor(Math.random() * chars.length));
+      return pool.charAt(array[0] % pool.length);
     }
+    return pool.charAt(Math.floor(Math.random() * pool.length));
   }
 
-  return out;
+  // Garantizar al menos un carácter de cada tipo requerido
+  const mandatory = [randomChar(lower + upper)];
+  if (useNumbers) mandatory.push(randomChar(numbers));
+  if (useSymbols) mandatory.push(randomChar(symbols));
+
+  const out = [...mandatory];
+  while (out.length < length) {
+    out.push(randomChar(chars));
+  }
+
+  // Mezclar (Fisher-Yates) para que los obligatorios no queden al inicio
+  for (let i = out.length - 1; i > 0; i--) {
+    let j;
+    if (cryptoObj && cryptoObj.getRandomValues) {
+      const array = new Uint32Array(1);
+      cryptoObj.getRandomValues(array);
+      j = array[0] % (i + 1);
+    } else {
+      j = Math.floor(Math.random() * (i + 1));
+    }
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+
+  return out.join('');
 }
